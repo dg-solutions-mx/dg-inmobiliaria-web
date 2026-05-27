@@ -1,30 +1,42 @@
 ---
-const whatsapp = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
-const waLink = `https://wa.me/${whatsapp.replace(/\D/g, '')}`;
-const year = new Date().getFullYear();
+import Brand from './Brand.astro';
+import Icon from './Icon.astro';
+const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20me%20interesa%20recibir%20asesor%C3%ADa%20inmobiliaria.';
 ---
-
-<footer class="bg-gray-900 text-gray-300 mt-24">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="flex flex-col md:flex-row justify-between gap-8">
-      <div>
-        <img src="/logo.svg" alt="DG Inmobiliaria" class="h-8 w-auto mb-4" />
-        <p class="text-sm">Mazatlán, Sinaloa, México</p>
-        <a href={waLink} target="_blank" rel="noopener noreferrer" class="text-sm hover:text-white">
-          {whatsapp}
-        </a>
+<footer class="footer">
+  <div class="footer-grid container">
+    <div class="footer-brand">
+      <Brand variant="footer" />
+      <p>Asesoría inmobiliaria en Mazatlán, Sinaloa. Te acompañamos para que tomes una decisión clara y segura.</p>
+      <div class="socials">
+        <a href="#" aria-label="Instagram"><Icon name="instagram" size={18} /></a>
+        <a href="#" aria-label="Facebook"><Icon name="facebook" size={18} /></a>
       </div>
-
-      <nav class="flex flex-col gap-2 text-sm">
-        <a href="/" class="hover:text-white">Inicio</a>
-        <a href="/propiedades" class="hover:text-white">Propiedades</a>
-        <a href="/nosotros" class="hover:text-white">Nosotros</a>
-        <a href="/contacto" class="hover:text-white">Contacto</a>
-      </nav>
     </div>
-
-    <div class="border-t border-gray-700 mt-8 pt-6 text-xs text-gray-500">
-      © {year} DG Inmobiliaria. Todos los derechos reservados.
+    <div class="footer-col">
+      <h3>Enlaces rápidos</h3>
+      <a href="#inicio">Inicio</a>
+      <a href="#como-te-ayudamos">Cómo te ayudamos</a>
+      <a href="#mazatlan">Mazatlán</a>
+      <a href="#proceso">Proceso</a>
+      <a href="#contacto">Contacto</a>
     </div>
+    <div class="footer-col">
+      <h3>Asesoría</h3>
+      <span>Compra de vivienda</span>
+      <span>Orientación personalizada</span>
+      <span>Opciones de crédito</span>
+      <span>Visitas y seguimiento</span>
+    </div>
+    <div class="footer-col footer-contact">
+      <h3>Contacto</h3>
+      <a href="tel:+526699334134"><Icon name="phone" size={17} /> 669 933 41 34</a>
+      <span><Icon name="location" size={17} /> Mazatlán, Sinaloa</span>
+      <a class="button button--outline-gold" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"><Icon name="whatsapp" size={17} /> Escríbenos por WhatsApp</a>
+    </div>
+  </div>
+  <div class="footer-bottom container">
+    <span>© 2026 DG Inmobiliaria. Todos los derechos reservados.</span>
+    <a href="#">Aviso de privacidad</a>
   </div>
 </footer>

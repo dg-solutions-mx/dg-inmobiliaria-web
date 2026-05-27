@@ -1,0 +1,13 @@
+---
+import Icon from './Icon.astro';
+const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20quiero%20informaci%C3%B3n%20para%20comprar%20vivienda%20en%20Mazatl%C3%A1n.';
+---
+<section class="final-cta container" data-reveal>
+  <img class="final-cta__bg" src="/assets/mazatlan-hero.webp" alt="" loading="lazy" />
+  <img class="final-cta__mark" src="/assets/dg-isotipo.png" alt="" />
+  <div class="final-cta__text">
+    <h2>Tu nueva historia empieza en Mazatlán.</h2>
+    <p>Permítenos ayudarte a encontrar el espacio que elevará tu vida.</p>
+  </div>
+  <a class="button button--gold" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Escribir por WhatsApp <Icon name="arrow" size={17} /></a>
+</section>

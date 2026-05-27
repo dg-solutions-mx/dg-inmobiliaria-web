@@ -1,0 +1,25 @@
+---
+const steps = [
+  { title: 'Nos conoces', text: 'Cuéntanos qué buscas y cuál es tu objetivo.' },
+  { title: 'Exploramos opciones', text: 'Te presentamos alternativas para ti.' },
+  { title: 'Tomas la decisión', text: 'Te orientamos para elegir con confianza.' },
+  { title: 'Hacemos realidad tu compra', text: 'Te acompañamos hasta el siguiente paso.' },
+];
+---
+<section class="process section" id="proceso">
+  <div class="container">
+    <div class="section-heading" data-reveal>
+      <p class="eyebrow">Nuestro proceso</p>
+      <h2>Así es como te acompañamos</h2>
+    </div>
+    <div class="steps" data-process-line data-reveal>
+      {steps.map((step, index) => (
+        <article class="step" style={`--delay:${index * 125}ms`}>
+          <div class="step__number">{String(index + 1).padStart(2, '0')}</div>
+          <h3>{step.title}</h3>
+          <p>{step.text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

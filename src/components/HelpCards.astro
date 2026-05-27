@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+const cards = [
+  { image: '/assets/card-casa.webp', icon: 'home', title: 'Comprar tu casa', text: 'Te ayudamos a encontrar una opción de vivienda de acuerdo con tu presupuesto y forma de compra.', action: 'Quiero orientación' },
+  { image: '/assets/card-explorar.webp', icon: 'search', title: 'Explorar opciones', text: 'Conoce alternativas y desarrollos en Mazatlán que se adapten a lo que estás buscando.', action: 'Conocer opciones' },
+  { image: '/assets/card-asesoria.webp', icon: 'user', title: 'Asesoría personalizada', text: 'Recibe atención directa para resolver dudas y avanzar con mayor confianza.', action: 'Hablar con un asesor' },
+];
+---
+<section class="help section" id="como-te-ayudamos">
+  <div class="container">
+    <div class="section-heading" data-reveal>
+      <p class="eyebrow">Cómo te ayudamos</p>
+      <h2>Encontramos el espacio ideal para tu vida</h2>
+    </div>
+    <div class="help-grid">
+      {cards.map((card, index) => (
+        <article class="help-card" data-reveal style={`--delay:${index * 120}ms`}>
+          <div class="help-card__photo">
+            <img src={card.image} alt="" loading="lazy" />
+          </div>
+          <div class="help-card__icon"><Icon name={card.icon} size={25} /></div>
+          <div class="help-card__body">
+            <h3>{index + 1}. {card.title}</h3>
+            <p>{card.text}</p>
+            <a href="#contacto">{card.action} <Icon name="arrow" size={16} /></a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,22 @@
+---
+import Icon from './Icon.astro';
+const benefits = [
+  { icon: 'building', title: 'Expertos locales', text: 'Conocemos Mazatlán y su mercado.' },
+  { icon: 'handshake', title: 'Asesoría personalizada', text: 'Te acompañamos en cada paso.' },
+  { icon: 'whatsapp', title: 'Atención por WhatsApp', text: 'Comunicación rápida y directa.' },
+  { icon: 'key', title: 'Orientación confiable', text: 'Encuentra tu vivienda ideal.' },
+];
+---
+<section class="trust-wrap" id="confianza">
+  <div class="trust-bar container" data-reveal>
+    {benefits.map((benefit, i) => (
+      <article class="trust-item" style={`--delay:${i * 85}ms`}>
+        <Icon name={benefit.icon} size={37} />
+        <div>
+          <h3>{benefit.title}</h3>
+          <p>{benefit.text}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>

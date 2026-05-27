@@ -1,0 +1,10 @@
+---
+const { variant = 'light', compact = false } = Astro.props;
+---
+<a class:list={['brand', `brand--${variant}`, compact && 'brand--compact']} href="#inicio" aria-label="DG Inmobiliaria - Inicio">
+  <img src="/assets/dg-isotipo.png" alt="" class="brand__mark" />
+  <span class="brand__text">
+    <strong>DG INMOBILIARIA</strong>
+    <small>Espacios que elevan tu vida</small>
+  </span>
+</a>

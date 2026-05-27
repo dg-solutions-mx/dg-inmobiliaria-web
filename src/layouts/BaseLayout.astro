@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+const {
+  title = 'DG Inmobiliaria Mazatlán | Tu próximo hogar empieza aquí',
+  description = 'Asesoría inmobiliaria personalizada en Mazatlán para encontrar vivienda y avanzar con claridad en tu proceso de compra.',
+} = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#123d50" />
+    <link rel="icon" type="image/png" href="/assets/dg-isotipo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <script is:inline>
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const header = document.querySelector('[data-header]');
+      const heroBg = document.querySelector('[data-parallax-hero]');
+      const lifestyleImage = document.querySelector('[data-parallax-lifestyle]');
+      const reveals = [...document.querySelectorAll('[data-reveal]')];
+      const process = document.querySelector('[data-process-line]');
+      const menuToggle = document.querySelector('[data-menu-toggle]');
+      const mobileMenu = document.querySelector('[data-mobile-menu]');
+
+      const setHeader = () => {
+        header?.classList.toggle('scrolled', window.scrollY > 28);
+      };
+      setHeader();
+      window.addEventListener('scroll', setHeader, { passive: true });
+
+      menuToggle?.addEventListener('click', () => {
+        const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', String(!expanded));
+        mobileMenu?.classList.toggle('open', !expanded);
+      });
+      mobileMenu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+      }));
+
+      if (reduceMotion) {
+        reveals.forEach((element) => element.classList.add('in-view'));
+        process?.classList.add('in-view');
+      } else {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.16, rootMargin: '0px 0px -36px 0px' });
+        reveals.forEach((element) => observer.observe(element));
+        if (process) observer.observe(process);
+
+        const parallax = () => {
+          const scroll = window.scrollY;
+          if (heroBg && scroll < window.innerHeight * 1.15) {
+            heroBg.style.transform = `scale(1.055) translateY(${scroll * 0.105}px)`;
+          }
+          if (lifestyleImage) {
+            const rect = lifestyleImage.closest('.lifestyle-photo')?.getBoundingClientRect();
+            if (rect && rect.top < window.innerHeight && rect.bottom > 0) {
+              const shift = (window.innerHeight / 2 - rect.top) * 0.035;
+              lifestyleImage.style.transform = `scale(1.08) translateY(${shift}px)`;
+            }
+          }
+        };
+        window.addEventListener('scroll', parallax, { passive: true });
+        parallax();
+      }
+    </script>
+  </body>
+</html>

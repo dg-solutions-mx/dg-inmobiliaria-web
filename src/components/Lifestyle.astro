@@ -1,0 +1,28 @@
+---
+import Icon from './Icon.astro';
+const features = [
+  { icon: 'sun', text: 'Clima ideal todo el año' },
+  { icon: 'wave', text: 'Playas que enamoran' },
+  { icon: 'fork', text: 'Vida y gastronomía local' },
+  { icon: 'building', text: 'Opciones residenciales' },
+];
+---
+<section class="lifestyle" id="mazatlan">
+  <div class="lifestyle-photo" data-reveal>
+    <img src="/assets/mazatlan-lifestyle.webp" alt="Atardecer en la costa de Mazatlán" loading="lazy" data-parallax-lifestyle />
+  </div>
+  <div class="lifestyle-copy" data-reveal>
+    <div class="contour-lines" aria-hidden="true"></div>
+    <p class="eyebrow">Mazatlán, un estilo de vida</p>
+    <h2>Vive el encanto del mar,<br /> la ciudad y su gente.</h2>
+    <p class="lifestyle-copy__lead">Mazatlán combina playa, vida cotidiana y nuevas oportunidades para encontrar un hogar en una ciudad que se disfruta todos los días.</p>
+    <div class="lifestyle-features">
+      {features.map((feature) => (
+        <div>
+          <Icon name={feature.icon} size={29} />
+          <span>{feature.text}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

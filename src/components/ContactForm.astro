@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro';
+const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20quiero%20encontrar%20vivienda%20en%20Mazatl%C3%A1n.';
+---
+<section class="contact section" id="contacto">
+  <div class="contact-card container" data-reveal>
+    <div class="contact-copy">
+      <p class="eyebrow">Hablemos</p>
+      <h2>Cuéntanos qué vivienda buscas.</h2>
+      <p>Estamos listos para orientarte con opciones en Mazatlán de acuerdo con tus necesidades y forma de compra.</p>
+      <a class="contact-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+        <Icon name="whatsapp" size={34} />
+        <span>Escríbenos por WhatsApp<strong>669 933 41 34</strong></span>
+      </a>
+    </div>
+    <form class="lead-form" action="#" method="post">
+      <label><span>Nombre completo</span><input name="nombre" type="text" placeholder="Nombre completo" /></label>
+      <label><span>Teléfono / WhatsApp</span><input name="telefono" type="tel" placeholder="Teléfono / WhatsApp" /></label>
+      <label><span>Correo electrónico</span><input name="correo" type="email" placeholder="Correo electrónico" /></label>
+      <label><span>¿Qué estás buscando?</span>
+        <select name="tipo">
+          <option value="">¿Qué estás buscando?</option>
+          <option>Casa</option>
+          <option>Departamento</option>
+          <option>Aún no estoy seguro</option>
+        </select>
+      </label>
+      <label class="lead-form__wide"><span>Mensaje</span><textarea name="mensaje" placeholder="Cuéntanos más sobre lo que buscas..."></textarea></label>
+      <button class="button button--gold lead-form__wide" type="button">Enviar mensaje <Icon name="arrow" size={17} /></button>
+      <small class="lead-form__note">Formulario visual. La integración de envío se conectará posteriormente.</small>
+    </form>
+  </div>
+</section>
