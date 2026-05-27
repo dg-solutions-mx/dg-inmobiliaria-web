@@ -2,9 +2,9 @@
 import { Home, Search, UserRound, ArrowRight } from 'lucide-astro';
 
 const cards = [
-  { image: '/assets/card-casa.webp', Icon: Home, title: 'Comprar tu casa', text: 'Te ayudamos a encontrar una opción de vivienda de acuerdo con tu presupuesto y forma de compra.', action: 'Quiero orientación' },
-  { image: '/assets/card-explorar.webp', Icon: Search, title: 'Explorar opciones', text: 'Conoce alternativas y desarrollos en Mazatlán que se adapten a lo que estás buscando.', action: 'Conocer opciones' },
-  { image: '/assets/card-asesoria.webp', Icon: UserRound, title: 'Asesoría personalizada', text: 'Recibe atención directa para resolver dudas y avanzar con mayor confianza.', action: 'Hablar con un asesor' },
+  { image: '/assets/card-casa.webp', Icon: Home, title: 'Comprar tu casa', text: 'Te ayudamos a encontrar una opción de vivienda de acuerdo con tu presupuesto y forma de compra.', action: 'Quiero orientación', href: '#contacto' },
+  { image: '/assets/card-explorar.webp', Icon: Search, title: 'Explorar opciones', text: 'Conoce alternativas y desarrollos en Mazatlán que se adapten a lo que estás buscando.', action: 'Ver propiedades', href: '/propiedades' },
+  { image: '/assets/card-asesoria.webp', Icon: UserRound, title: 'Asesoría personalizada', text: 'Recibe atención directa para resolver dudas y avanzar con mayor confianza.', action: 'Hablar con un asesor', href: '#contacto' },
 ];
 ---
 <section class="help section" id="como-te-ayudamos">
@@ -23,7 +23,7 @@ const cards = [
           <div class="help-card__body">
             <h3>{index + 1}. {card.title}</h3>
             <p>{card.text}</p>
-            <a href="#contacto">{card.action} <ArrowRight size={16} stroke-width={1.5} /></a>
+            <a href={card.href}>{card.action} <ArrowRight size={16} stroke-width={1.5} /></a>
           </div>
         </article>
       ))}
