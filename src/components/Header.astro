@@ -1,5 +1,5 @@
 ---
-const whatsapp = import.meta.env.PUBLIC_WHATSAPP_NUMBER;
+const whatsapp = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
 const waLink = `https://wa.me/${whatsapp.replace(/\D/g, '')}`;
 
 const navLinks = [
