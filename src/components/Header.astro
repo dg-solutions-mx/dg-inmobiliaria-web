@@ -1,6 +1,6 @@
 ---
 import Brand from './Brand.astro';
-import Icon from './Icon.astro';
+import { MessageCircle, Menu } from 'lucide-astro';
 const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20me%20interesa%20conocer%20opciones%20de%20vivienda%20en%20Mazatl%C3%A1n.';
 ---
 <header class="site-header" data-header>
@@ -14,11 +14,11 @@ const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20me%20interesa%20
       <a href="#contacto">Contacto</a>
     </nav>
     <a class="button button--gold header-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-      <Icon name="whatsapp" size={17} />
+      <MessageCircle size={17} stroke-width={1.5} />
       <span>669 933 41 34</span>
     </a>
     <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-menu-toggle>
-      <Icon name="menu" size={26} />
+      <Menu size={26} stroke-width={1.5} />
     </button>
   </div>
   <nav class="mobile-menu" aria-label="Navegación móvil" data-mobile-menu>

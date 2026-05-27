@@ -1,0 +1,591 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import WhatsAppButton from '../../components/WhatsAppButton.astro';
+import { supabase, getPropiedades, type Propiedad } from '../../lib/supabase';
+import {
+  MapPin, BedDouble, Bath, Car, Waves, Leaf, Wind,
+  UtensilsCrossed, ArrowUp, Shield, Laptop, Package,
+  User, Droplets, Sun, Tv, Wine, Eye, Building2,
+  CheckCircle2, Archive, Activity, ChevronLeft, ChevronRight,
+  Heart, Share2, MessageCircle, ArrowRight, Check, Camera,
+  Maximize2,
+} from 'lucide-astro';
+
+// ── Static paths ──────────────────────────────────────────────
+export async function getStaticPaths() {
+  try {
+    const props = await getPropiedades();
+    return props.map((p) => ({ params: { slug: p.slug }, props: { prop: p } }));
+  } catch {
+    return [];
+  }
+}
+
+const { prop } = Astro.props as { prop: Propiedad };
+
+// ── Related properties ────────────────────────────────────────
+const { data: relPool } = await supabase
+  .from('propiedades')
+  .select('id, slug, titulo, tipo, zona, precio, moneda, metros_construccion, metros_terreno, imagenes, estado_venta, estado_publicacion, caracteristicas, destacada')
+  .eq('activa', true)
+  .neq('id', prop.id)
+  .limit(8);
+
+const pool = (relPool || []) as Propiedad[];
+const related = [
+  ...pool.filter((p) => p.tipo === prop.tipo),
+  ...pool.filter((p) => p.tipo !== prop.tipo),
+].slice(0, 3);
+
+// ── Image data ────────────────────────────────────────────────
+const FALLBACK = '/assets/mazatlan-hero.webp';
+const images: string[] = prop.imagenes?.length ? prop.imagenes : [FALLBACK];
+const hasMany = images.length > 1;
+
+// ── Labels ────────────────────────────────────────────────────
+const TIPO_LBL: Record<string, string>  = { casa: 'Casa', departamento: 'Departamento', terreno: 'Terreno', desarrollo: 'Desarrollo' };
+const VENTA_LBL: Record<string, string> = { disponible: 'Disponible', apartado: 'Apartado', vendido: 'Vendido' };
+const VENTA_CLS: Record<string, string> = { disponible: 'disponible', apartado: 'apartado', vendido: 'vendido' };
+
+const tipoLabel   = TIPO_LBL[prop.tipo]        ?? prop.tipo;
+const estadoLabel = VENTA_LBL[prop.estado_venta] ?? prop.estado_venta;
+const estadoClass = VENTA_CLS[prop.estado_venta] ?? 'disponible';
+
+// ── Feature extraction ────────────────────────────────────────
+function extractNum(arr: string[] | null, kw: string): string | null {
+  if (!arr) return null;
+  const item = arr.find((s) => s.toLowerCase().includes(kw));
+  if (!item) return null;
+  const m = item.match(/\d+/);
+  return m ? m[0] : null;
+}
+const c = prop.caracteristicas;
+const recamaras      = extractNum(c, 'recámara') ?? extractNum(c, 'recamara') ?? extractNum(c, 'cuarto');
+const banos          = extractNum(c, 'baño');
+const estacionamientos = extractNum(c, 'estacionamiento') ?? extractNum(c, 'cajón') ?? extractNum(c, 'garage');
+const area           = prop.metros_construccion ?? prop.metros_terreno;
+
+// ── Price ─────────────────────────────────────────────────────
+const fmtPrice = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+const preciofmt = fmtPrice.format(prop.precio);
+const precioM2  = prop.precio_por_m2 ? `${fmtPrice.format(prop.precio_por_m2)}/m²` : null;
+
+// ── WhatsApp ──────────────────────────────────────────────────
+const WA_MSG  = encodeURIComponent(`Hola, me interesa la propiedad: ${prop.titulo} en ${prop.zona}. ¿Podrían darme más información?`);
+const WA_URL  = `https://wa.me/526699334134?text=${WA_MSG}`;
+
+// ── Char → icon mapping ───────────────────────────────────────
+function getCharIcon(char: string) {
+  const s = char.toLowerCase();
+  if (s.includes('recámara') || s.includes('recamara') || s.includes('cuarto') || s.includes('habitación')) return BedDouble;
+  if (s.includes('baño'))                                          return Bath;
+  if (s.includes('estacionamiento') || s.includes('cajón') || s.includes('garage')) return Car;
+  if (s.includes('alberca') || s.includes('piscina'))             return Waves;
+  if (s.includes('jardín') || s.includes('jardin') || s.includes('patio')) return Leaf;
+  if (s.includes('terraza') || s.includes('balcón') || s.includes('balcon')) return Wind;
+  if (s.includes('cocina'))                                        return UtensilsCrossed;
+  if (s.includes('elevador'))                                      return ArrowUp;
+  if (s.includes('seguridad') || s.includes('vigilancia'))        return Shield;
+  if (s.includes('gym') || s.includes('gimnasio') || s.includes('fitness')) return Activity;
+  if (s.includes('coworking') || s.includes('oficina'))           return Laptop;
+  if (s.includes('bodega') || s.includes('almacén'))              return Archive;
+  if (s.includes('servicio'))                                      return User;
+  if (s.includes('lavado') || s.includes('lavandería'))           return Droplets;
+  if (s.includes('amueblado') || s.includes('equipad'))           return Package;
+  if (s.includes('roof') || s.includes('lobby'))                  return Building2;
+  if (s.includes('cine') || s.includes('sala de tv'))             return Tv;
+  if (s.includes('bar') || s.includes('vino'))                    return Wine;
+  if (s.includes('vista') || s.includes('panorámica'))            return Eye;
+  if (s.includes('solar') || s.includes('luz natural'))           return Sun;
+  return CheckCircle2;
+}
+const charsWithIcons = (prop.caracteristicas ?? []).map((char) => ({
+  label: char,
+  Icon: getCharIcon(char),
+}));
+
+// ── Map ───────────────────────────────────────────────────────
+const mapSrc = prop.latitud && prop.longitud
+  ? `https://maps.google.com/maps?q=${prop.latitud},${prop.longitud}&z=16&output=embed&hl=es`
+  : null;
+const mapsHref = prop.latitud && prop.longitud
+  ? `https://www.google.com/maps?q=${prop.latitud},${prop.longitud}`
+  : '#';
+
+// ── Zone distances ────────────────────────────────────────────
+const ZONE_DIST: Record<string, string[]> = {
+  'Cerritos':         ['Playa Cerritos frente al fraccionamiento', '10 min al aeropuerto internacional', '5 min a zona comercial Punto Valle'],
+  'Marina Mazatlán':  ['Marina deportiva frente al desarrollo', 'Malecón de Mazatlán a 10 min caminando', '15 min al aeropuerto internacional'],
+  'Zona Dorada':      ['Playa Gaviotas a 5 min caminando', 'Restaurantes y comercios al frente', 'Malecón histórico a 10 min'],
+  'El Cid':           ['Campo de golf El Cid dentro del fracc.', 'Club de playa a 5 min en auto', 'Plaza La Marina a 8 min'],
+  'Centro Histórico': ['Teatro Ángela Peralta a 2 cuadras', 'Playa Olas Altas a 5 min caminando', 'Mercado Pino Suárez a 3 cuadras'],
+  'Lomas del Mar':    ['Plaza Sendero a 5 min en auto', 'Zona Dorada a 10 min', 'Colegios y hospitales cercanos'],
+  'Brujas':           ['Zona residencial con parques y canchas', 'Blvd. Sinaloa a 5 min', 'Supermercados y servicios a 3 min'],
+  'Los Pinos':        ['Zona norte en alto crecimiento', 'Nuevos desarrollos comerciales cercanos', 'Libramiento a 5 min para movilidad rápida'],
+};
+const distances = ZONE_DIST[prop.zona] ?? [];
+
+// ── SEO ───────────────────────────────────────────────────────
+const pageTitle = `${prop.titulo} en ${prop.zona} | DG Inmobiliaria`;
+const pageDesc  = prop.descripcion
+  ?? `${tipoLabel} en ${prop.zona}, Mazatlán. ${preciofmt} ${prop.moneda}.`;
+
+// ── Vars for client script ────────────────────────────────────
+const galleryImages = images;
+const propTitle     = prop.titulo;
+const propZona      = prop.zona;
+const propSlug      = prop.slug;
+---
+
+<BaseLayout title={pageTitle} description={pageDesc}>
+  <Header />
+  <main>
+
+    <!-- Breadcrumb -->
+    <nav class="prop-breadcrumb" aria-label="Ruta de navegación">
+      <div class="container">
+        <ol>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="/propiedades">Propiedades</a></li>
+          <li aria-current="page">{prop.titulo}</li>
+        </ol>
+      </div>
+    </nav>
+
+    <!-- Detail body -->
+    <section class="prop-detail__body">
+      <div class="container">
+        <div class="prop-detail__layout">
+
+          <!-- ── LEFT: main content ── -->
+          <div class="prop-detail__main">
+
+            <!-- Gallery -->
+            <div class="prop-gallery" data-gallery>
+              <div class="prop-gallery__main">
+                <img id="gallery-main-img" src={images[0]} alt={prop.titulo} width="900" height="500" fetchpriority="high" />
+
+                <!-- Badges -->
+                <div class="prop-gallery__badges">
+                  <span class="prop-card__badge prop-card__badge--tipo">{tipoLabel}</span>
+                  <span class:list={['prop-card__badge prop-card__badge--estado', `prop-card__badge--${estadoClass}`]}>{estadoLabel}</span>
+                  {prop.estado_publicacion === 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Preventa</span>}
+                  {prop.destacada && prop.estado_publicacion !== 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Destacada</span>}
+                </div>
+
+                <!-- Action buttons -->
+                <div class="prop-gallery__actions">
+                  <button class="prop-gallery__action-btn" id="btn-fav" type="button" aria-label="Guardar en favoritos">
+                    <Heart size={17} stroke-width={1.5} />
+                  </button>
+                  <button class="prop-gallery__action-btn" id="btn-share" type="button" aria-label="Compartir propiedad">
+                    <Share2 size={17} stroke-width={1.5} />
+                  </button>
+                </div>
+
+                <!-- Counter -->
+                <span class="prop-gallery__counter" id="gallery-counter">1 / {images.length}</span>
+
+                <!-- Navigation arrows -->
+                {hasMany && (
+                  <>
+                    <button class="prop-gallery__nav prop-gallery__nav--prev" id="gallery-prev" type="button" aria-label="Imagen anterior">
+                      <ChevronLeft size={22} stroke-width={1.5} />
+                    </button>
+                    <button class="prop-gallery__nav prop-gallery__nav--next" id="gallery-next" type="button" aria-label="Siguiente imagen">
+                      <ChevronRight size={22} stroke-width={1.5} />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <!-- Thumbnails -->
+              {hasMany && (
+                <div class="prop-gallery__thumbs" id="gallery-thumbs" aria-label="Miniaturas de galería">
+                  {images.map((img, i) => (
+                    <button
+                      class:list={['prop-gallery__thumb', i === 0 && 'active']}
+                      data-thumb={i}
+                      type="button"
+                      aria-label={`Ver imagen ${i + 1}`}
+                    >
+                      <img src={img} alt={`${prop.titulo} ${i + 1}`} loading="lazy" width="90" height="62" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <!-- Property info -->
+            <div class="prop-info">
+              <h1>{prop.titulo}</h1>
+              <p class="prop-zona">
+                <MapPin size={14} stroke-width={1.5} />
+                {prop.zona}, Mazatlán
+              </p>
+              <p class="prop-price">{preciofmt}</p>
+              <p class="prop-price-sub">
+                {prop.moneda}
+                {precioM2 && <> · {precioM2}</>}
+                {prop.acepta_creditos?.length && <> · {prop.acepta_creditos.join(' · ')}</>}
+              </p>
+
+              <!-- Feature row -->
+              <div class="prop-feats-row">
+                {area && (
+                  <div class="prop-feat-item">
+                    <Maximize2 size={17} stroke-width={1.5} />
+                    {area} m² <span>superficie</span>
+                  </div>
+                )}
+                {recamaras && (
+                  <div class="prop-feat-item">
+                    <BedDouble size={18} stroke-width={1.5} />
+                    {recamaras} <span>recámaras</span>
+                  </div>
+                )}
+                {banos && (
+                  <div class="prop-feat-item">
+                    <Bath size={18} stroke-width={1.5} />
+                    {banos} <span>baños</span>
+                  </div>
+                )}
+                {estacionamientos && (
+                  <div class="prop-feat-item">
+                    <Car size={18} stroke-width={1.5} />
+                    {estacionamientos} <span>auto(s)</span>
+                  </div>
+                )}
+                {prop.metros_terreno && prop.metros_construccion && (
+                  <div class="prop-feat-item">
+                    <MapPin size={18} stroke-width={1.5} />
+                    {prop.metros_terreno} m² <span>terreno</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            {prop.descripcion && (
+              <section class="prop-section" id="descripcion" aria-label="Descripción">
+                <h2>Descripción</h2>
+                <p class="prop-section__text">{prop.descripcion}</p>
+              </section>
+            )}
+
+            <!-- Características -->
+            {charsWithIcons.length > 0 && (
+              <section class="prop-section" id="caracteristicas" aria-label="Características">
+                <h2>Características</h2>
+                <div class="prop-chars-grid">
+                  {charsWithIcons.map(({ label, Icon }) => (
+                    <div class="prop-char">
+                      <Icon size={18} stroke-width={1.5} />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <!-- Galería (masonry) — only if real images exist -->
+            {prop.imagenes?.length > 1 && (
+              <section class="prop-section" id="galeria" aria-label="Galería de fotos">
+                <h2>Galería</h2>
+                <div class="prop-photos-grid" id="photos-grid">
+                  {prop.imagenes.slice(0, 9).map((img, i) => (
+                    <img
+                      src={img}
+                      alt={`${prop.titulo} — foto ${i + 1}`}
+                      class="prop-photo-img"
+                      loading="lazy"
+                      width="400"
+                      height="300"
+                      data-photo-idx={i}
+                    />
+                  ))}
+                </div>
+                {prop.imagenes.length > 9 && (
+                  <button class="prop-show-all" id="btn-show-all" type="button">
+                    <Camera size={14} stroke-width={1.5} />
+                    Ver todas las fotos ({prop.imagenes.length})
+                  </button>
+                )}
+              </section>
+            )}
+
+            <!-- Ubicación -->
+            {(mapSrc || prop.direccion_aprox) && (
+              <section class="prop-section" id="ubicacion" aria-label="Ubicación">
+                <h2>Ubicación</h2>
+                {prop.direccion_aprox && (
+                  <address class="prop-map-address">
+                    <MapPin size={14} stroke-width={1.5} style="flex-shrink:0;margin-top:1px;color:var(--gold)" />
+                    {prop.direccion_aprox}
+                  </address>
+                )}
+                {mapSrc && (
+                  <div class="prop-map">
+                    <iframe
+                      src={mapSrc}
+                      title={`Mapa de ubicación: ${prop.titulo}`}
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                      aria-label="Mapa de ubicación"
+                    ></iframe>
+                  </div>
+                )}
+                {distances.length > 0 && (
+                  <ul class="prop-distances">
+                    {distances.map((d) => <li>{d}</li>)}
+                  </ul>
+                )}
+                {mapSrc && (
+                  <a class="prop-map-link" href={mapsHref} target="_blank" rel="noopener noreferrer">
+                    <MapPin size={13} stroke-width={1.5} />
+                    Abrir en Google Maps
+                  </a>
+                )}
+              </section>
+            )}
+
+            <!-- Related properties -->
+            {related.length > 0 && (
+              <section class="prop-section" id="relacionadas" aria-label="Propiedades similares">
+                <h2>También podría interesarte</h2>
+                <div class="prop-related-grid">
+                  {related.map((r) => {
+                    const rImg   = r.imagenes?.[0] ?? FALLBACK;
+                    const rTipo  = TIPO_LBL[r.tipo]  ?? r.tipo;
+                    const rVenta = VENTA_LBL[r.estado_venta] ?? r.estado_venta;
+                    const rCls   = VENTA_CLS[r.estado_venta] ?? 'disponible';
+                    const rArea  = r.metros_construccion ?? r.metros_terreno;
+                    const rRec   = extractNum(r.caracteristicas, 'recámara') ?? extractNum(r.caracteristicas, 'recamara');
+                    const rBan   = extractNum(r.caracteristicas, 'baño');
+                    return (
+                      <article class="prop-card">
+                        <div class="prop-card__img">
+                          <img src={rImg} alt={r.titulo} loading="lazy" width="300" height="200" />
+                          <span class="prop-card__badge prop-card__badge--tipo">{rTipo}</span>
+                          <span class:list={['prop-card__badge prop-card__badge--estado', `prop-card__badge--${rCls}`]}>{rVenta}</span>
+                        </div>
+                        <div class="prop-card__body">
+                          <p class="prop-card__zona">
+                            <MapPin size={12} stroke-width={1.5} />{r.zona}
+                          </p>
+                          <h3 class="prop-card__title">{r.titulo}</h3>
+                          <p class="prop-card__price">{fmtPrice.format(r.precio)} <span>{r.moneda}</span></p>
+                          {(rArea || rRec || rBan) && (
+                            <div class="prop-card__features">
+                              {rArea && <span class="prop-card__feat"><ArrowRight size={10} stroke-width={1.5} />{rArea} m²</span>}
+                              {rRec  && <span class="prop-card__feat"><BedDouble size={12} stroke-width={1.5} />{rRec} rec.</span>}
+                              {rBan  && <span class="prop-card__feat"><Bath size={12} stroke-width={1.5} />{rBan} baños</span>}
+                            </div>
+                          )}
+                          <a class="button button--gold prop-card__cta" href={`/propiedades/${r.slug}`}>
+                            Ver propiedad <ArrowRight size={14} stroke-width={1.5} />
+                          </a>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+          </div><!-- /prop-detail__main -->
+
+          <!-- ── RIGHT: sidebar ── -->
+          <aside class="prop-sidebar" aria-label="Contacto y solicitud">
+            <div class="prop-sidebar__card">
+
+              <!-- Logo -->
+              <div class="prop-sidebar__logo">
+                <img src="/assets/dg-isotipo.png" alt="" aria-hidden="true" />
+                <div class="prop-sidebar__logo-text">
+                  <strong translate="no">DG INMOBILIARIA</strong>
+                  <small>Espacios que elevan tu vida</small>
+                </div>
+              </div>
+
+              <h3>Solicitar más información</h3>
+
+              <!-- Contact form -->
+              <form class="prop-request-form" id="prop-form" novalidate>
+                <input
+                  type="text" name="nombre" placeholder="Tu nombre completo"
+                  autocomplete="name" required aria-label="Nombre completo"
+                />
+                <input
+                  type="tel" name="telefono" placeholder="Teléfono o celular"
+                  autocomplete="tel" aria-label="Teléfono"
+                />
+                <input
+                  type="email" name="correo" placeholder="Correo electrónico"
+                  autocomplete="email" aria-label="Correo electrónico"
+                />
+                <select name="interes" aria-label="¿En qué estás interesado?">
+                  <option value="">Estoy interesado en…</option>
+                  <option value="Solicitar una visita">Solicitar una visita</option>
+                  <option value="Comprar con crédito INFONAVIT / FOVISSSTE">Comprar con crédito INFONAVIT / FOVISSSTE</option>
+                  <option value="Solicitar crédito bancario">Solicitar crédito bancario</option>
+                  <option value="Comprar de contado">Comprar de contado</option>
+                  <option value="Obtener más información">Obtener más información</option>
+                </select>
+                <textarea
+                  name="mensaje"
+                  placeholder="¿Alguna pregunta específica sobre esta propiedad?"
+                  aria-label="Mensaje"
+                ></textarea>
+                <button class="button button--gold" type="submit">
+                  Solicitar información <ArrowRight size={15} stroke-width={1.5} />
+                </button>
+              </form>
+
+              <!-- WhatsApp button -->
+              <a class="prop-wa-btn" href={WA_URL} target="_blank" rel="noopener noreferrer" aria-label="Hablar por WhatsApp">
+                <MessageCircle size={17} stroke-width={1.5} />
+                Hablar por WhatsApp
+              </a>
+
+              <!-- Trust bullets -->
+              <ul class="prop-trust" aria-label="Garantías de servicio">
+                <li>
+                  <span class="prop-trust__icon"><Check size={12} stroke-width={2.5} /></span>
+                  Atención personalizada en todo momento
+                </li>
+                <li>
+                  <span class="prop-trust__icon"><Check size={12} stroke-width={2.5} /></span>
+                  Compra con crédito o recursos propios
+                </li>
+                <li>
+                  <span class="prop-trust__icon"><Check size={12} stroke-width={2.5} /></span>
+                  Respuesta rápida · sin compromiso
+                </li>
+              </ul>
+
+            </div>
+          </aside>
+
+        </div><!-- /prop-detail__layout -->
+      </div><!-- /container -->
+    </section>
+
+    <!-- Bottom CTA banner -->
+    <section class="prop-cta-banner" aria-label="¿Te interesa esta propiedad?">
+      <div class="container">
+        <div class="prop-cta-banner__inner">
+          <div>
+            <h2>¿Te interesa esta propiedad?</h2>
+            <p>Contáctanos hoy y te asesoramos sin costo. Somos expertos en el mercado inmobiliario de Mazatlán.</p>
+          </div>
+          <a class="button button--gold" href={WA_URL} target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+            <MessageCircle size={17} stroke-width={1.5} />
+            Hablar por WhatsApp
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+  <WhatsAppButton />
+</BaseLayout>
+
+<script define:vars={{ galleryImages, propTitle, propZona, propSlug }}>
+  /* ── Gallery ─────────────────────────────────────────────── */
+  const imgs  = Array.isArray(galleryImages) ? galleryImages : [];
+  let cur = 0;
+
+  const mainImg  = document.getElementById('gallery-main-img');
+  const counter  = document.getElementById('gallery-counter');
+  const thumbBtns = document.querySelectorAll('[data-thumb]');
+
+  function goTo(idx) {
+    cur = ((idx % imgs.length) + imgs.length) % imgs.length;
+    if (mainImg) {
+      mainImg.style.opacity = '0';
+      setTimeout(() => {
+        mainImg.src = imgs[cur];
+        mainImg.style.opacity = '1';
+      }, 140);
+    }
+    if (counter) counter.textContent = `${cur + 1} / ${imgs.length}`;
+    thumbBtns.forEach((t, i) => {
+      t.classList.toggle('active', i === cur);
+    });
+    thumbBtns[cur]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  document.getElementById('gallery-prev')?.addEventListener('click', () => goTo(cur - 1));
+  document.getElementById('gallery-next')?.addEventListener('click', () => goTo(cur + 1));
+  thumbBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
+
+  document.addEventListener('keydown', (e) => {
+    if (imgs.length <= 1) return;
+    if (e.key === 'ArrowLeft')  goTo(cur - 1);
+    if (e.key === 'ArrowRight') goTo(cur + 1);
+  });
+
+  /* ── Favorite (localStorage) ─────────────────────────────── */
+  const favKey = `dg_fav_${propSlug}`;
+  const btnFav = document.getElementById('btn-fav');
+  if (btnFav) {
+    if (localStorage.getItem(favKey) === '1') btnFav.classList.add('favorited');
+    btnFav.addEventListener('click', () => {
+      const next = btnFav.classList.toggle('favorited');
+      localStorage.setItem(favKey, next ? '1' : '0');
+    });
+  }
+
+  /* ── Share ───────────────────────────────────────────────── */
+  document.getElementById('btn-share')?.addEventListener('click', async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: propTitle, text: `${propTitle} en ${propZona}`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        const btn = document.getElementById('btn-share');
+        if (btn) {
+          btn.style.background = 'rgba(189,152,80,.9)';
+          setTimeout(() => { btn.style.background = ''; }, 1600);
+        }
+      }
+    } catch {}
+  });
+
+  /* ── Show all photos ─────────────────────────────────────── */
+  document.getElementById('btn-show-all')?.addEventListener('click', () => {
+    const grid = document.getElementById('photos-grid');
+    if (!grid) return;
+    grid.querySelectorAll('.prop-photo-img[hidden]').forEach(img => img.removeAttribute('hidden'));
+    document.getElementById('btn-show-all').style.display = 'none';
+  });
+
+  /* ── Contact form → WhatsApp ─────────────────────────────── */
+  document.getElementById('prop-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const nombre   = fd.get('nombre')   || '';
+    const telefono = fd.get('telefono') || '';
+    const correo   = fd.get('correo')   || '';
+    const interes  = fd.get('interes')  || `la propiedad ${propTitle}`;
+    const mensaje  = fd.get('mensaje')  || '';
+
+    const parts = [
+      `Hola, soy ${nombre}`,
+      telefono && `mi teléfono es ${telefono}`,
+      correo   && `y mi correo ${correo}`,
+      `Estoy interesado en: ${interes}`,
+      `Propiedad: ${propTitle} (${propZona})`,
+      mensaje  && `Mensaje adicional: ${mensaje}`,
+    ].filter(Boolean);
+
+    const text = parts.join('. ') + '.';
+    window.open(`https://wa.me/526699334134?text=${encodeURIComponent(text)}`, '_blank');
+    e.target.reset();
+  });
+</script>

@@ -1,0 +1,25 @@
+---
+---
+<div
+  class="props-grid"
+  id="props-grid"
+  role="list"
+  aria-live="polite"
+  aria-label="Listado de propiedades"
+>
+  {Array.from({ length: 6 }).map(() => (
+    <div class="prop-skeleton" aria-hidden="true">
+      <div class="prop-skeleton__img"></div>
+      <div class="prop-skeleton__body">
+        <div class="prop-skeleton__line prop-skeleton__line--short"></div>
+        <div class="prop-skeleton__line"></div>
+        <div class="prop-skeleton__line prop-skeleton__line--price"></div>
+        <div class="prop-skeleton__feats">
+          <div class="prop-skeleton__feat"></div>
+          <div class="prop-skeleton__feat"></div>
+          <div class="prop-skeleton__feat"></div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>

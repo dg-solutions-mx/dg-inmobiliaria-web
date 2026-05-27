@@ -1,0 +1,23 @@
+---
+const tabs = [
+  { id: 'todas',        label: 'Todas' },
+  { id: 'casa',         label: 'Casas' },
+  { id: 'departamento', label: 'Departamentos' },
+  { id: 'infonavit',    label: 'Infonavit' },
+  { id: 'bancario',     label: 'Bancario' },
+  { id: 'preventa',     label: 'Preventa' },
+];
+---
+<div class="props-tabs" role="tablist" aria-label="Filtrar propiedades por categoría">
+  {tabs.map(({ id, label }, i) => (
+    <button
+      class:list={['props-tab', i === 0 && 'active']}
+      role="tab"
+      aria-selected={i === 0 ? 'true' : 'false'}
+      data-tab={id}
+      type="button"
+    >
+      {label}
+    </button>
+  ))}
+</div>

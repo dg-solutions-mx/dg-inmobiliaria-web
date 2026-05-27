@@ -1,9 +1,9 @@
 ---
-import Icon from './Icon.astro';
+import { Phone, Home, MapPin, ArrowRight, MessageCircle } from 'lucide-astro';
 const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20viviendas%20en%20Mazatl%C3%A1n.';
 ---
 <section class="hero" id="inicio" aria-label="DG Inmobiliaria Mazatlán">
-  <img class="hero__background" src="/assets/mazatlan-hero.webp" alt="Costa y skyline de Mazatlán al atardecer" fetchpriority="high" data-parallax-hero />
+  <img class="hero__background" src="/assets/mazatlan-hero.webp" alt="Costa y skyline de Mazatlán al atardecer" width="1920" height="1080" fetchpriority="high" data-parallax-hero />
   <div class="hero__overlay"></div>
   <div class="hero__content container">
     <div class="hero__copy animate-intro">
@@ -11,21 +11,21 @@ const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20quiero%20informa
       <h1>Tu próximo hogar en<br class="desktop-break" /> Mazatlán empieza aquí.</h1>
       <p class="hero__description">Asesoría personalizada, experiencia local y opciones de vivienda para ayudarte a tomar la decisión correcta.</p>
       <div class="hero__actions">
-        <a class="button button--gold" href="#contacto">Encontrar vivienda <Icon name="arrow" size={17} /></a>
-        <a class="button button--glass" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"><Icon name="whatsapp" size={18} /> Hablemos por WhatsApp</a>
+        <a class="button button--gold" href="#contacto">Encontrar vivienda <ArrowRight size={17} stroke-width={1.5} /></a>
+        <a class="button button--glass" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} stroke-width={1.5} /> Hablemos por WhatsApp</a>
       </div>
     </div>
     <aside class="hero-panel animate-intro" aria-label="Información de contacto">
       <div class="hero-panel__item">
-        <Icon name="phone" size={26} />
+        <Phone size={26} stroke-width={1.5} />
         <div><span>Contacto directo</span><strong>669 933 41 34</strong></div>
       </div>
       <div class="hero-panel__item">
-        <Icon name="home" size={26} />
+        <Home size={26} stroke-width={1.5} />
         <div><span>Asesoría</span><strong>DG Inmobiliaria</strong></div>
       </div>
       <div class="hero-panel__item">
-        <Icon name="location" size={26} />
+        <MapPin size={26} stroke-width={1.5} />
         <div><span>Ubicación</span><strong>Mazatlán, Sinaloa</strong></div>
       </div>
     </aside>

@@ -1,10 +1,11 @@
 ---
-import Icon from './Icon.astro';
+import { Sun, Waves, UtensilsCrossed, Building2 } from 'lucide-astro';
+
 const features = [
-  { icon: 'sun', text: 'Clima ideal todo el año' },
-  { icon: 'wave', text: 'Playas que enamoran' },
-  { icon: 'fork', text: 'Vida y gastronomía local' },
-  { icon: 'building', text: 'Opciones residenciales' },
+  { Icon: Sun, text: 'Clima ideal todo el año' },
+  { Icon: Waves, text: 'Playas que enamoran' },
+  { Icon: UtensilsCrossed, text: 'Vida y gastronomía local' },
+  { Icon: Building2, text: 'Opciones residenciales' },
 ];
 ---
 <section class="lifestyle" id="mazatlan">
@@ -19,7 +20,7 @@ const features = [
     <div class="lifestyle-features">
       {features.map((feature) => (
         <div>
-          <Icon name={feature.icon} size={29} />
+          <feature.Icon size={29} stroke-width={1.5} />
           <span>{feature.text}</span>
         </div>
       ))}

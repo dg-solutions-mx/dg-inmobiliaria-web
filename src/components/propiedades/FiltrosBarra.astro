@@ -1,0 +1,61 @@
+---
+---
+<div class="filtros-barra" id="filtros">
+  <div class="filtros-barra__inner">
+    <div class="filtros-barra__selects">
+
+      <div class="filtros-field">
+        <label for="filtro-zona" class="filtros-field__label">Zona</label>
+        <select id="filtro-zona" class="filtros-select" aria-label="Filtrar por zona">
+          <option value="">Todas las zonas</option>
+          <option value="Cerritos">Cerritos</option>
+          <option value="Marina Mazatlán">Marina Mazatlán</option>
+          <option value="Zona Dorada">Zona Dorada</option>
+          <option value="El Cid">El Cid</option>
+          <option value="Centro Histórico">Centro Histórico</option>
+          <option value="Lomas del Mar">Lomas del Mar</option>
+          <option value="Brujas">Brujas</option>
+          <option value="Los Pinos">Los Pinos</option>
+        </select>
+      </div>
+
+      <div class="filtros-field">
+        <label for="filtro-tipo" class="filtros-field__label">Tipo</label>
+        <select id="filtro-tipo" class="filtros-select" aria-label="Filtrar por tipo de propiedad">
+          <option value="">Todos los tipos</option>
+          <option value="casa">Casa</option>
+          <option value="departamento">Departamento</option>
+          <option value="terreno">Terreno</option>
+          <option value="desarrollo">Desarrollo</option>
+        </select>
+      </div>
+
+      <div class="filtros-field">
+        <label for="filtro-precio" class="filtros-field__label">Precio MXN</label>
+        <select id="filtro-precio" class="filtros-select" aria-label="Filtrar por rango de precio">
+          <option value="">Todos los precios</option>
+          <option value="0-1500000">Hasta $1.5M</option>
+          <option value="1500000-3000000">$1.5M – $3M</option>
+          <option value="3000000-5000000">$3M – $5M</option>
+          <option value="5000000-999999999">Más de $5M</option>
+        </select>
+      </div>
+
+      <div class="filtros-field">
+        <label for="filtro-credito" class="filtros-field__label">Forma de compra</label>
+        <select id="filtro-credito" class="filtros-select" aria-label="Filtrar por forma de compra">
+          <option value="">Todas las formas</option>
+          <option value="INFONAVIT">INFONAVIT</option>
+          <option value="FOVISSSTE">FOVISSSTE</option>
+          <option value="Bancario">Crédito bancario</option>
+          <option value="Contado">Contado</option>
+        </select>
+      </div>
+
+    </div>
+    <button class="button button--gold filtros-barra__btn" id="btn-buscar" type="button" aria-label="Aplicar filtros">
+      Buscar
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </div>
+</div>

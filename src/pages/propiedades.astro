@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import PropiedadesHero from '../components/propiedades/PropiedadesHero.astro';
+import FiltrosBarra from '../components/propiedades/FiltrosBarra.astro';
+import PropiedadesTabs from '../components/propiedades/PropiedadesTabs.astro';
+import PropiedadesGrid from '../components/propiedades/PropiedadesGrid.astro';
+import PropiedadesCTA from '../components/propiedades/PropiedadesCTA.astro';
+import { getPropiedades } from '../lib/supabase';
+
+let initialProps: any[] = [];
+try {
+  initialProps = await getPropiedades();
+} catch (e) {
+  console.error('[propiedades] Error al cargar desde Supabase:', e);
+}
+---
+
+<BaseLayout
+  title="Propiedades en Mazatlán | DG Inmobiliaria"
+  description="Explora casas, departamentos y desarrollos disponibles en Mazatlán, Sinaloa. Asesoría inmobiliaria personalizada con DG Inmobiliaria."
+>
+  <Header />
+  <main>
+    <PropiedadesHero />
+
+    <section class="propiedades-page" id="propiedades" aria-label="Listado de propiedades">
+      <div class="container">
+        <FiltrosBarra />
+
+        <div class="props-controls">
+          <PropiedadesTabs />
+          <p class="props-count" id="props-count" aria-live="polite" aria-atomic="true"></p>
+        </div>
+
+        <PropiedadesGrid />
+
+        <div id="props-empty" class="props-empty" hidden>
+          <div class="props-empty__icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <p>No encontramos propiedades con esos criterios.</p>
+          <p class="props-empty__note">Intenta ajustar los filtros o explora todas las zonas disponibles.</p>
+          <button class="button button--outline-gold" id="btn-limpiar" type="button">Limpiar filtros</button>
+        </div>
+
+        <nav id="props-pagination" class="props-pagination" aria-label="Paginación"></nav>
+      </div>
+    </section>
+
+    <PropiedadesCTA />
+  </main>
+  <Footer />
+  <WhatsAppButton />
+</BaseLayout>
+
+<script define:vars={{ initialProps }}>
+  /* ── State ─────────────────────────────────────────────────── */
+  let allProps   = Array.isArray(initialProps) ? initialProps : [];
+  let filtered   = [...allProps];
+  let currentPage = 1;
+  let currentTab  = 'todas';
+  const PER_PAGE  = 6;
+  const WA        = 'https://wa.me/526699334134?text=';
+
+  /* ── DOM refs ──────────────────────────────────────────────── */
+  const grid        = document.getElementById('props-grid');
+  const paginationEl = document.getElementById('props-pagination');
+  const countEl     = document.getElementById('props-count');
+  const emptyEl     = document.getElementById('props-empty');
+
+  /* ── Helpers ───────────────────────────────────────────────── */
+  const fmt = new Intl.NumberFormat('es-MX', {
+    style: 'currency', currency: 'MXN', maximumFractionDigits: 0
+  });
+
+  function num(arr, kw) {
+    if (!arr) return null;
+    const item = arr.find(s => s.toLowerCase().includes(kw));
+    if (!item) return null;
+    const m = item.match(/\d+/);
+    return m ? m[0] : null;
+  }
+
+  const TIPO  = { casa: 'Casa', departamento: 'Depto.', terreno: 'Terreno', desarrollo: 'Desarrollo' };
+  const VENTA = { disponible: 'Disponible', apartado: 'Apartado', vendido: 'Vendido' };
+  const VCLS  = { disponible: 'disponible', apartado: 'apartado', vendido: 'vendido' };
+
+  /* ── SVG icon strings (lucide paths) ───────────────────────── */
+  const I = {
+    pin:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    area: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+    bed:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`,
+    bath: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" y1="5" x2="8" y2="7"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="20" y1="17" x2="20" y2="21"/><line x1="4" y1="17" x2="4" y2="21"/></svg>`,
+    car:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+    wa:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+    arrow: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+  };
+
+  /* ── Card template ─────────────────────────────────────────── */
+  function cardHtml(p) {
+    const img  = (p.imagenes && p.imagenes[0]) ? p.imagenes[0] : '/assets/mazatlan-hero.webp';
+    const c    = p.caracteristicas;
+    const rec  = num(c, 'recámara') || num(c, 'recamara') || num(c, 'cuarto') || num(c, 'habitación');
+    const ban  = num(c, 'baño');
+    const est  = num(c, 'estacionamiento') || num(c, 'cajón') || num(c, 'garage');
+    const area = p.metros_construccion || p.metros_terreno;
+
+    const feats = [
+      area ? `<span class="prop-card__feat">${I.area}${area} m²</span>` : '',
+      rec  ? `<span class="prop-card__feat">${I.bed}${rec} rec.</span>` : '',
+      ban  ? `<span class="prop-card__feat">${I.bath}${ban} ${ban === '1' ? 'baño' : 'baños'}</span>` : '',
+      est  ? `<span class="prop-card__feat">${I.car}${est} auto</span>` : '',
+    ].filter(Boolean).join('');
+
+    const badge = p.estado_publicacion === 'preventa'
+      ? '<span class="prop-card__badge prop-card__badge--destacada">Preventa</span>'
+      : (p.destacada ? '<span class="prop-card__badge prop-card__badge--destacada">Destacada</span>' : '');
+
+    const detailUrl = `/propiedades/${p.slug}`;
+
+    return `<article class="prop-card" role="listitem">
+  <div class="prop-card__img">
+    <img src="${img}" alt="${p.titulo}" loading="lazy" width="400" height="200" />
+    <span class="prop-card__badge prop-card__badge--tipo">${TIPO[p.tipo] || p.tipo}</span>
+    <span class="prop-card__badge prop-card__badge--estado prop-card__badge--${VCLS[p.estado_venta] || 'disponible'}">${VENTA[p.estado_venta] || p.estado_venta}</span>
+    ${badge}
+  </div>
+  <div class="prop-card__body">
+    <p class="prop-card__zona">${I.pin}${p.zona}</p>
+    <h3 class="prop-card__title">${p.titulo}</h3>
+    <p class="prop-card__price">${fmt.format(p.precio)}<span>${p.moneda}</span></p>
+    ${feats ? `<div class="prop-card__features">${feats}</div>` : ''}
+    <a class="button button--gold prop-card__cta" href="${detailUrl}">${I.arrow} Ver propiedad</a>
+  </div>
+</article>`;
+  }
+
+  /* ── Filter logic ──────────────────────────────────────────── */
+  function applyFilters() {
+    const zona    = document.getElementById('filtro-zona').value;
+    const tipo    = document.getElementById('filtro-tipo').value;
+    const precio  = document.getElementById('filtro-precio').value;
+    const credito = document.getElementById('filtro-credito').value;
+
+    filtered = allProps.filter(p => {
+      if (zona   && p.zona  !== zona)  return false;
+      if (tipo   && p.tipo  !== tipo)  return false;
+      if (precio) {
+        const [min, max] = precio.split('-').map(Number);
+        if (p.precio < min || p.precio > max) return false;
+      }
+      if (credito) {
+        const creds = (p.acepta_creditos || []).map(c => c.toLowerCase());
+        if (!creds.some(c => c.includes(credito.toLowerCase()))) return false;
+      }
+      return true;
+    });
+
+    if      (currentTab === 'casa')         filtered = filtered.filter(p => p.tipo === 'casa');
+    else if (currentTab === 'departamento') filtered = filtered.filter(p => p.tipo === 'departamento');
+    else if (currentTab === 'infonavit')    filtered = filtered.filter(p => (p.acepta_creditos || []).some(c => c.toLowerCase().includes('infonavit')));
+    else if (currentTab === 'bancario')     filtered = filtered.filter(p => (p.acepta_creditos || []).some(c => c.toLowerCase().includes('bancario')));
+    else if (currentTab === 'preventa')     filtered = filtered.filter(p => p.estado_publicacion === 'preventa');
+
+    currentPage = 1;
+    render();
+  }
+
+  /* ── Render ────────────────────────────────────────────────── */
+  function render() {
+    const total      = filtered.length;
+    const totalPages = Math.ceil(total / PER_PAGE);
+    const page       = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+    countEl.textContent = `${total} propiedad${total !== 1 ? 'es' : ''} encontrada${total !== 1 ? 's' : ''}`;
+
+    if (total === 0) {
+      grid.innerHTML    = '';
+      emptyEl.hidden    = false;
+      paginationEl.innerHTML = '';
+      return;
+    }
+
+    emptyEl.hidden    = true;
+    grid.innerHTML    = page.map(cardHtml).join('');
+
+    if (totalPages <= 1) { paginationEl.innerHTML = ''; return; }
+
+    let html = '';
+    if (currentPage > 1)
+      html += `<button class="props-page-btn" data-page="${currentPage - 1}" aria-label="Anterior">‹</button>`;
+    for (let i = 1; i <= totalPages; i++)
+      html += `<button class="props-page-btn${i === currentPage ? ' active' : ''}" data-page="${i}" aria-label="Página ${i}">${i}</button>`;
+    if (currentPage < totalPages)
+      html += `<button class="props-page-btn" data-page="${currentPage + 1}" aria-label="Siguiente">›</button>`;
+    paginationEl.innerHTML = html;
+  }
+
+  /* ── Event listeners ───────────────────────────────────────── */
+  document.getElementById('btn-buscar')?.addEventListener('click', applyFilters);
+
+  document.querySelectorAll('.filtros-select').forEach(sel =>
+    sel.addEventListener('change', applyFilters)
+  );
+
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTab = btn.dataset.tab;
+      document.querySelectorAll('[data-tab]').forEach(b => {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-selected', String(b === btn));
+      });
+      applyFilters();
+    });
+  });
+
+  paginationEl?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-page]');
+    if (!btn) return;
+    currentPage = Number(btn.dataset.page);
+    render();
+    document.getElementById('propiedades')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('btn-limpiar')?.addEventListener('click', () => {
+    ['filtro-zona', 'filtro-tipo', 'filtro-precio', 'filtro-credito']
+      .forEach(id => { document.getElementById(id).value = ''; });
+    currentTab = 'todas';
+    document.querySelectorAll('[data-tab]').forEach((b, i) => {
+      b.classList.toggle('active', i === 0);
+      b.setAttribute('aria-selected', String(i === 0));
+    });
+    filtered = [...allProps];
+    currentPage = 1;
+    render();
+  });
+
+  /* ── Initial render ────────────────────────────────────────── */
+  render();
+</script>

@@ -1,7 +1,7 @@
 ---
-import Icon from './Icon.astro';
+import { MessageCircle } from 'lucide-astro';
 const WHATSAPP_URL = 'https://wa.me/526699334134?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20viviendas%20en%20Mazatl%C3%A1n.';
 ---
 <a class="floating-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
-  <Icon name="whatsapp" size={27} />
+  <MessageCircle size={27} stroke-width={1.5} />
 </a>
