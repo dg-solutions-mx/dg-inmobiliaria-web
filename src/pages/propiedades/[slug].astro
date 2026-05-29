@@ -10,7 +10,7 @@ import {
   User, Droplets, Sun, Tv, Wine, Eye, Building2,
   CheckCircle2, Archive, Activity, ChevronLeft, ChevronRight,
   Heart, Share2, MessageCircle, ArrowRight, Check, Camera,
-  Maximize2,
+  Maximize2, X,
 } from 'lucide-astro';
 
 // ── Dynamic SSR fetch ─────────────────────────────────────────
@@ -184,60 +184,87 @@ const propSlug      = prop.slug;
           <!-- ── LEFT: main content ── -->
           <div class="prop-detail__main">
 
-            <!-- Gallery -->
-            <div class="prop-gallery" data-gallery>
-              <div class="prop-gallery__main">
-                <img id="gallery-main-img" src={images[0]} alt={prop.titulo} width="900" height="500" fetchpriority="high" />
+            <!-- Gallery: Mosaico (desktop) + Swiper (móvil) + Lightbox -->
 
-                <!-- Badges -->
-                <div class="prop-gallery__badges">
-                  <span class="prop-card__badge prop-card__badge--tipo">{tipoLabel}</span>
-                  <span class:list={['prop-card__badge prop-card__badge--estado', `prop-card__badge--${estadoClass}`]}>{estadoLabel}</span>
-                  {prop.estado_publicacion === 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Preventa</span>}
-                  {prop.destacada && prop.estado_publicacion !== 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Destacada</span>}
-                </div>
-
-                <!-- Action buttons -->
-                <div class="prop-gallery__actions">
-                  <button class="prop-gallery__action-btn" id="btn-fav" type="button" aria-label="Guardar en favoritos">
-                    <Heart size={17} stroke-width={1.5} />
-                  </button>
-                  <button class="prop-gallery__action-btn" id="btn-share" type="button" aria-label="Compartir propiedad">
-                    <Share2 size={17} stroke-width={1.5} />
-                  </button>
-                </div>
-
-                <!-- Counter -->
-                <span class="prop-gallery__counter" id="gallery-counter">1 / {images.length}</span>
-
-                <!-- Navigation arrows -->
-                {hasMany && (
-                  <>
-                    <button class="prop-gallery__nav prop-gallery__nav--prev" id="gallery-prev" type="button" aria-label="Imagen anterior">
-                      <ChevronLeft size={22} stroke-width={1.5} />
-                    </button>
-                    <button class="prop-gallery__nav prop-gallery__nav--next" id="gallery-next" type="button" aria-label="Siguiente imagen">
-                      <ChevronRight size={22} stroke-width={1.5} />
-                    </button>
-                  </>
-                )}
+            <!-- Mosaico — desktop/tablet -->
+            <div class:list={['pg-mosaic', images.length === 1 && 'pg-mosaic--single']}>
+              <div class="pg-mosaic__badges">
+                <span class="prop-card__badge prop-card__badge--tipo">{tipoLabel}</span>
+                <span class:list={['prop-card__badge prop-card__badge--estado', `prop-card__badge--${estadoClass}`]}>{estadoLabel}</span>
+                {prop.estado_publicacion === 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Preventa</span>}
+                {prop.destacada && prop.estado_publicacion !== 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Destacada</span>}
               </div>
-
-              <!-- Thumbnails -->
-              {hasMany && (
-                <div class="prop-gallery__thumbs" id="gallery-thumbs" aria-label="Miniaturas de galería">
-                  {images.map((img, i) => (
-                    <button
-                      class:list={['prop-gallery__thumb', i === 0 && 'active']}
-                      data-thumb={i}
-                      type="button"
-                      aria-label={`Ver imagen ${i + 1}`}
-                    >
-                      <img src={img} alt={`${prop.titulo} ${i + 1}`} loading="lazy" width="90" height="62" />
+              <div class="pg-mosaic__actions">
+                <button class="prop-gallery__action-btn" id="btn-fav" type="button" aria-label="Guardar en favoritos">
+                  <Heart size={17} stroke-width={1.5} />
+                </button>
+                <button class="prop-gallery__action-btn" id="btn-share" type="button" aria-label="Compartir propiedad">
+                  <Share2 size={17} stroke-width={1.5} />
+                </button>
+              </div>
+              <button class="pg-mosaic__main" data-lb="0" type="button" aria-label="Ver galería completa">
+                <img src={images[0]} alt={prop.titulo} width="900" height="600" fetchpriority="high" />
+              </button>
+              {images.length > 1 && (
+                <div class:list={['pg-mosaic__grid', `pg-mosaic__grid--${Math.min(images.length - 1, 4)}`]}>
+                  {images.slice(1, 5).map((img, i, arr) => (
+                    <button class="pg-mosaic__thumb" data-lb={i + 1} type="button" aria-label={`Ver foto ${i + 2}`}>
+                      <img src={img} alt={`${prop.titulo} foto ${i + 2}`} loading="lazy" width="400" height="300" />
+                      {i === arr.length - 1 && (
+                        <div class="pg-mosaic__more">
+                          <Camera size={16} stroke-width={1.5} />
+                          <span>Ver {images.length} fotos</span>
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
               )}
+            </div>
+
+            <!-- Swiper — móvil -->
+            <div class="pg-swiper">
+              <div class="pg-swiper__track" id="pg-track">
+                {images.map((img, i) => (
+                  <div class="pg-swiper__slide">
+                    <img src={img} alt={`${prop.titulo} ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} width="800" height="500" />
+                  </div>
+                ))}
+              </div>
+              <div class="pg-mosaic__badges">
+                <span class="prop-card__badge prop-card__badge--tipo">{tipoLabel}</span>
+                <span class:list={['prop-card__badge prop-card__badge--estado', `prop-card__badge--${estadoClass}`]}>{estadoLabel}</span>
+                {prop.estado_publicacion === 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Preventa</span>}
+                {prop.destacada && prop.estado_publicacion !== 'preventa' && <span class="prop-card__badge prop-card__badge--destacada">Destacada</span>}
+              </div>
+              <span class="pg-swiper__counter" id="pg-swiper-counter">1 / {images.length}</span>
+              {images.length > 1 && (
+                <button class="pg-swiper__view" id="pg-swiper-view" type="button">
+                  <Camera size={13} stroke-width={1.5} />
+                  Ver fotos
+                </button>
+              )}
+            </div>
+
+            <!-- Lightbox -->
+            <div class="pg-lb" id="pg-lb" role="dialog" aria-modal="true" aria-label="Galería de fotos" hidden>
+              <button class="pg-lb__close" id="pg-lb-close" type="button" aria-label="Cerrar galería">
+                <X size={20} stroke-width={2} />
+              </button>
+              {images.length > 1 && (
+                <>
+                  <button class="pg-lb__nav pg-lb__nav--prev" id="pg-lb-prev" type="button" aria-label="Foto anterior">
+                    <ChevronLeft size={28} stroke-width={1.5} />
+                  </button>
+                  <button class="pg-lb__nav pg-lb__nav--next" id="pg-lb-next" type="button" aria-label="Siguiente foto">
+                    <ChevronRight size={28} stroke-width={1.5} />
+                  </button>
+                </>
+              )}
+              <div class="pg-lb__stage">
+                <img id="pg-lb-img" src={images[0]} alt={prop.titulo} />
+              </div>
+              <span class="pg-lb__counter" id="pg-lb-counter">1 / {images.length}</span>
             </div>
 
             <!-- Property info -->
@@ -312,31 +339,6 @@ const propSlug      = prop.slug;
               </section>
             )}
 
-            <!-- Galería (masonry) — only if real images exist -->
-            {images.length > 1 && (
-              <section class="prop-section" id="galeria" aria-label="Galería de fotos">
-                <h2>Galería</h2>
-                <div class="prop-photos-grid" id="photos-grid">
-                  {images.slice(0, 9).map((img, i) => (
-                    <img
-                      src={img}
-                      alt={`${prop.titulo} — foto ${i + 1}`}
-                      class="prop-photo-img"
-                      loading="lazy"
-                      width="400"
-                      height="300"
-                      data-photo-idx={i}
-                    />
-                  ))}
-                </div>
-                {images.length > 9 && (
-                  <button class="prop-show-all" id="btn-show-all" type="button">
-                    <Camera size={14} stroke-width={1.5} />
-                    Ver todas las fotos ({images.length})
-                  </button>
-                )}
-              </section>
-            )}
 
             <!-- Ubicación -->
             {(mapSrc || prop.direccion_aprox) && (
@@ -517,38 +519,67 @@ const propSlug      = prop.slug;
 </BaseLayout>
 
 <script define:vars={{ galleryImages, propTitle, propZona, propSlug }}>
-  /* ── Gallery ─────────────────────────────────────────────── */
-  const imgs  = Array.isArray(galleryImages) ? galleryImages : [];
-  let cur = 0;
+  /* ── Gallery: Lightbox + Swiper ─────────────────────────── */
+  const imgs = Array.isArray(galleryImages) ? galleryImages : [];
+  let lbCur = 0;
 
-  const mainImg  = document.getElementById('gallery-main-img');
-  const counter  = document.getElementById('gallery-counter');
-  const thumbBtns = document.querySelectorAll('[data-thumb]');
+  const lb      = document.getElementById('pg-lb');
+  const lbImg   = document.getElementById('pg-lb-img');
+  const lbCtr   = document.getElementById('pg-lb-counter');
 
-  function goTo(idx) {
-    cur = ((idx % imgs.length) + imgs.length) % imgs.length;
-    if (mainImg) {
-      mainImg.style.opacity = '0';
-      setTimeout(() => {
-        mainImg.src = imgs[cur];
-        mainImg.style.opacity = '1';
-      }, 140);
-    }
-    if (counter) counter.textContent = `${cur + 1} / ${imgs.length}`;
-    thumbBtns.forEach((t, i) => {
-      t.classList.toggle('active', i === cur);
-    });
-    thumbBtns[cur]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  function lbOpen(idx) {
+    lbCur = ((idx % imgs.length) + imgs.length) % imgs.length;
+    if (lbImg) { lbImg.src = imgs[lbCur]; lbImg.alt = `Foto ${lbCur + 1}`; }
+    if (lbCtr) lbCtr.textContent = `${lbCur + 1} / ${imgs.length}`;
+    if (lb) { lb.hidden = false; document.body.style.overflow = 'hidden'; }
+    document.getElementById('pg-lb-close')?.focus();
   }
 
-  document.getElementById('gallery-prev')?.addEventListener('click', () => goTo(cur - 1));
-  document.getElementById('gallery-next')?.addEventListener('click', () => goTo(cur + 1));
-  thumbBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
+  function lbClose() {
+    if (lb) { lb.hidden = true; document.body.style.overflow = ''; }
+  }
+
+  function lbGo(delta) {
+    lbCur = ((lbCur + delta) % imgs.length + imgs.length) % imgs.length;
+    if (!lbImg) return;
+    lbImg.style.opacity = '0';
+    setTimeout(() => {
+      lbImg.src = imgs[lbCur];
+      lbImg.style.opacity = '1';
+      if (lbCtr) lbCtr.textContent = `${lbCur + 1} / ${imgs.length}`;
+    }, 130);
+  }
+
+  document.getElementById('pg-lb-close')?.addEventListener('click', lbClose);
+  document.getElementById('pg-lb-prev')?.addEventListener('click', () => lbGo(-1));
+  document.getElementById('pg-lb-next')?.addEventListener('click', () => lbGo(1));
+  lb?.addEventListener('click', (e) => { if (e.target === lb) lbClose(); });
+
+  document.querySelectorAll('[data-lb]').forEach((btn) => {
+    btn.addEventListener('click', () => lbOpen(Number(btn.dataset.lb)));
+  });
 
   document.addEventListener('keydown', (e) => {
-    if (imgs.length <= 1) return;
-    if (e.key === 'ArrowLeft')  goTo(cur - 1);
-    if (e.key === 'ArrowRight') goTo(cur + 1);
+    if (lb?.hidden) return;
+    if (e.key === 'Escape')     lbClose();
+    if (e.key === 'ArrowLeft')  lbGo(-1);
+    if (e.key === 'ArrowRight') lbGo(1);
+  });
+
+  /* ── Mobile swiper ───────────────────────────────────────── */
+  const track     = document.getElementById('pg-track');
+  const swiperCtr = document.getElementById('pg-swiper-counter');
+
+  if (track && swiperCtr && imgs.length > 1) {
+    track.addEventListener('scroll', () => {
+      const idx = Math.round(track.scrollLeft / track.offsetWidth);
+      swiperCtr.textContent = `${idx + 1} / ${imgs.length}`;
+    }, { passive: true });
+  }
+
+  document.getElementById('pg-swiper-view')?.addEventListener('click', () => {
+    const idx = track ? Math.round(track.scrollLeft / track.offsetWidth) : 0;
+    lbOpen(idx);
   });
 
   /* ── Favorite (localStorage) ─────────────────────────────── */
@@ -577,14 +608,6 @@ const propSlug      = prop.slug;
         }
       }
     } catch {}
-  });
-
-  /* ── Show all photos ─────────────────────────────────────── */
-  document.getElementById('btn-show-all')?.addEventListener('click', () => {
-    const grid = document.getElementById('photos-grid');
-    if (!grid) return;
-    grid.querySelectorAll('.prop-photo-img[hidden]').forEach(img => img.removeAttribute('hidden'));
-    document.getElementById('btn-show-all').style.display = 'none';
   });
 
   /* ── Contact form → WhatsApp ─────────────────────────────── */
