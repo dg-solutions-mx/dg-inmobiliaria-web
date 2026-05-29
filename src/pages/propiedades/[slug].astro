@@ -26,7 +26,7 @@ try {
 // ── Related properties ────────────────────────────────────────
 const { data: relPool } = await supabase
   .from('propiedades')
-  .select('id, slug, titulo, tipo, zona, precio, moneda, metros_construccion, metros_terreno, imagenes, estado_venta, estado_publicacion, caracteristicas, destacada')
+  .select('id, slug, titulo, tipo, zona, precio, moneda, metros_construccion, metros_terreno, imagenes, portada, estado_venta, estado_publicacion, caracteristicas, destacada')
   .eq('activa', true)
   .neq('id', prop.id)
   .limit(8);
@@ -39,7 +39,31 @@ const related = [
 
 // ── Image data ────────────────────────────────────────────────
 const FALLBACK = '/assets/mazatlan-hero.webp';
-const images: string[] = prop.imagenes?.length ? prop.imagenes : [FALLBACK];
+let images: string[] = [];
+
+if (prop.carpeta_imagenes) {
+  const { data: storageFiles } = await supabase.storage
+    .from('propiedades-imagenes')
+    .list(prop.carpeta_imagenes, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+
+  if (storageFiles?.length) {
+    images = storageFiles
+      .filter(f => f.name !== '.emptyFolderPlaceholder')
+      .map(f => supabase.storage
+        .from('propiedades-imagenes')
+        .getPublicUrl(`${prop.carpeta_imagenes}/${f.name}`).data.publicUrl
+      );
+  }
+}
+
+if (images.length === 0) {
+  images = prop.imagenes?.length
+    ? prop.imagenes
+    : prop.portada
+      ? [prop.portada]
+      : [FALLBACK];
+}
+
 const hasMany = images.length > 1;
 
 // ── Labels ────────────────────────────────────────────────────
@@ -289,11 +313,11 @@ const propSlug      = prop.slug;
             )}
 
             <!-- Galería (masonry) — only if real images exist -->
-            {prop.imagenes?.length > 1 && (
+            {images.length > 1 && (
               <section class="prop-section" id="galeria" aria-label="Galería de fotos">
                 <h2>Galería</h2>
                 <div class="prop-photos-grid" id="photos-grid">
-                  {prop.imagenes.slice(0, 9).map((img, i) => (
+                  {images.slice(0, 9).map((img, i) => (
                     <img
                       src={img}
                       alt={`${prop.titulo} — foto ${i + 1}`}
@@ -305,10 +329,10 @@ const propSlug      = prop.slug;
                     />
                   ))}
                 </div>
-                {prop.imagenes.length > 9 && (
+                {images.length > 9 && (
                   <button class="prop-show-all" id="btn-show-all" type="button">
                     <Camera size={14} stroke-width={1.5} />
-                    Ver todas las fotos ({prop.imagenes.length})
+                    Ver todas las fotos ({images.length})
                   </button>
                 )}
               </section>
@@ -355,7 +379,7 @@ const propSlug      = prop.slug;
                 <h2>También podría interesarte</h2>
                 <div class="prop-related-grid">
                   {related.map((r) => {
-                    const rImg   = r.imagenes?.[0] ?? FALLBACK;
+                    const rImg   = r.portada ?? r.imagenes?.[0] ?? FALLBACK;
                     const rTipo  = TIPO_LBL[r.tipo]  ?? r.tipo;
                     const rVenta = VENTA_LBL[r.estado_venta] ?? r.estado_venta;
                     const rCls   = VENTA_CLS[r.estado_venta] ?? 'disponible';

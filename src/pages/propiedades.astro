@@ -101,7 +101,7 @@ try {
 
   /* ── Card template ─────────────────────────────────────────── */
   function cardHtml(p) {
-    const img  = (p.imagenes && p.imagenes[0]) ? p.imagenes[0] : '/assets/mazatlan-hero.webp';
+    const img  = p.portada || (p.imagenes && p.imagenes[0]) || '/assets/mazatlan-hero.webp';
     const c    = p.caracteristicas;
     const rec  = num(c, 'recámara') || num(c, 'recamara') || num(c, 'cuarto') || num(c, 'habitación');
     const ban  = num(c, 'baño');

@@ -44,6 +44,8 @@ export type Propiedad = {
   acepta_creditos: string[] | null;
   caracteristicas: string[] | null;
   imagenes: string[] | null;
+  portada: string | null;
+  carpeta_imagenes: string | null;
   destacada: boolean;
   activa: boolean;
   visitas: number;
