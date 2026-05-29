@@ -31,6 +31,10 @@ const {
       const mobileMenu = document.querySelector('[data-mobile-menu]');
 
       const setHeader = () => {
+        if (header?.hasAttribute('data-header-always-scrolled')) {
+          header.classList.add('scrolled');
+          return;
+        }
         header?.classList.toggle('scrolled', window.scrollY > 28);
       };
       setHeader();
