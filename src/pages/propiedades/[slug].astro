@@ -163,7 +163,43 @@ const propZona      = sanitize(prop.zona);
 const propSlug      = sanitize(prop.slug);
 ---
 
-<BaseLayout title={pageTitle} description={pageDesc}>
+<BaseLayout title={pageTitle} description={pageDesc} ogImage={images[0]}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Inicio',      item: 'https://dginmobiliaria.mx' },
+        { '@type': 'ListItem', position: 2, name: 'Propiedades', item: 'https://dginmobiliaria.mx/propiedades' },
+        { '@type': 'ListItem', position: 3, name: prop.titulo,   item: `https://dginmobiliaria.mx/propiedades/${prop.slug}` },
+      ],
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'RealEstateListing',
+      name: prop.titulo,
+      description: prop.descripcion ?? `${tipoLabel} en ${prop.zona}, Mazatlán.`,
+      url: `https://dginmobiliaria.mx/propiedades/${prop.slug}`,
+      image: images.slice(0, 5),
+      offers: {
+        '@type': 'Offer',
+        price: prop.precio,
+        priceCurrency: prop.moneda === 'MXN' ? 'MXN' : 'USD',
+        availability: prop.estado_venta === 'disponible'
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/SoldOut',
+      },
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Mazatlán',
+        addressRegion: 'Sinaloa',
+        addressCountry: 'MX',
+        neighborhood: prop.zona,
+      },
+      numberOfRooms: recamaras ?? undefined,
+      floorSize: area ? { '@type': 'QuantitativeValue', value: area, unitCode: 'MTK' } : undefined,
+    })} />
+  </Fragment>
   <Header opaque={true} />
   <main>
 

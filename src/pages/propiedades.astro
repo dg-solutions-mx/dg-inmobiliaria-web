@@ -43,6 +43,16 @@ try {
   title="Propiedades en Mazatlán | DG Inmobiliaria"
   description="Explora casas, departamentos y desarrollos disponibles en Mazatlán, Sinaloa. Asesoría inmobiliaria personalizada con DG Inmobiliaria."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Inicio',       item: 'https://dginmobiliaria.mx' },
+        { '@type': 'ListItem', position: 2, name: 'Propiedades',  item: 'https://dginmobiliaria.mx/propiedades' },
+      ],
+    })} />
+  </Fragment>
   <Header />
   <main>
     <PropiedadesHero />

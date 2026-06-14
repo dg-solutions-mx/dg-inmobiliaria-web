@@ -10,8 +10,32 @@ import ContactForm from '../components/ContactForm.astro';
 import FinalCTA from '../components/FinalCTA.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateAgent',
+  name: 'DG Inmobiliaria',
+  description: 'Asesoría inmobiliaria personalizada en Mazatlán, Sinaloa. Casas, departamentos, terrenos y desarrollos.',
+  url: 'https://dginmobiliaria.mx',
+  telephone: '+526699334134',
+  image: 'https://dginmobiliaria.mx/assets/mazatlan-hero.webp',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Mazatlán',
+    addressRegion: 'Sinaloa',
+    addressCountry: 'MX',
+  },
+  areaServed: { '@type': 'City', name: 'Mazatlán' },
+  knowsAbout: ['Bienes raíces', 'INFONAVIT', 'Crédito bancario', 'Preventa'],
+};
 ---
-<BaseLayout>
+<BaseLayout
+  title="DG Inmobiliaria Mazatlán | Tu próximo hogar empieza aquí"
+  description="Asesoría inmobiliaria personalizada en Mazatlán para encontrar vivienda y avanzar con claridad en tu proceso de compra."
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
   <Header />
   <main>
     <Hero />

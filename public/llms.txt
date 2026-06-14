@@ -1,0 +1,28 @@
+# DG Inmobiliaria
+
+> Asesoría inmobiliaria personalizada en Mazatlán, Sinaloa, México.
+
+DG Inmobiliaria ayuda a familias y personas a encontrar casas, departamentos, terrenos y desarrollos en Mazatlán. Ofrecemos asesoría sin costo, acompañamiento en créditos INFONAVIT, FOVISSSTE y bancarios, y atención personalizada de principio a fin.
+
+## Páginas principales
+
+- [Inicio](https://dginmobiliaria.mx/) — Presentación del servicio, proceso de compra y contacto.
+- [Propiedades](https://dginmobiliaria.mx/propiedades) — Listado de propiedades disponibles en Mazatlán con filtros por zona, tipo y precio.
+- [Detalle de propiedad](https://dginmobiliaria.mx/propiedades/[slug]) — Información completa de cada propiedad: fotos, características, ubicación y formulario de contacto.
+
+## Zonas que atendemos
+
+Cerritos, Marina Mazatlán, Zona Dorada, El Cid, Centro Histórico, Lomas del Mar, Brujas, Los Pinos.
+
+## Tipos de propiedad
+
+Casas, departamentos, terrenos y desarrollos en preventa.
+
+## Créditos aceptados
+
+INFONAVIT, FOVISSSTE, crédito bancario, contado.
+
+## Contacto
+
+- WhatsApp: +52 669 933 4134
+- Ubicación: Mazatlán, Sinaloa, México
