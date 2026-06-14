@@ -64,7 +64,7 @@ export const getPropiedades = async (filtros?: {
 }) => {
   let query = supabase
     .from('propiedades')
-    .select('*')
+    .select('id, slug, titulo, tipo, estado_venta, estado_publicacion, precio, precio_por_m2, moneda, zona, metros_terreno, metros_construccion, acepta_creditos, caracteristicas, imagenes, portada, destacada, activa, created_at')
     .eq('activa', true)
     .order('created_at', { ascending: false });
 

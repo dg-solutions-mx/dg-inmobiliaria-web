@@ -10,9 +10,30 @@ import PropiedadesGrid from '../components/propiedades/PropiedadesGrid.astro';
 import PropiedadesCTA from '../components/propiedades/PropiedadesCTA.astro';
 import { getPropiedades } from '../lib/supabase';
 
+function sanitizeForClient(s: any): string {
+  return String(s ?? '').replace(/<\/script>/gi, '<\\/script>');
+}
+
 let initialProps: any[] = [];
 try {
-  initialProps = await getPropiedades();
+  const fetched = await getPropiedades();
+  initialProps = fetched.map(p => ({
+    slug:               sanitizeForClient(p.slug),
+    titulo:             sanitizeForClient(p.titulo),
+    tipo:               sanitizeForClient(p.tipo),
+    zona:               sanitizeForClient(p.zona),
+    moneda:             sanitizeForClient(p.moneda),
+    estado_venta:       sanitizeForClient(p.estado_venta),
+    estado_publicacion: sanitizeForClient(p.estado_publicacion),
+    precio:             p.precio,
+    metros_construccion: p.metros_construccion,
+    metros_terreno:     p.metros_terreno,
+    portada:            p.portada  ? sanitizeForClient(p.portada)  : null,
+    imagenes:           p.imagenes?.map(sanitizeForClient) ?? null,
+    caracteristicas:    p.caracteristicas?.map(sanitizeForClient) ?? null,
+    acepta_creditos:    p.acepta_creditos?.map(sanitizeForClient) ?? null,
+    destacada:          p.destacada,
+  }));
 } catch (e) {
   console.error('[propiedades] Error al cargar desde Supabase:', e);
 }
@@ -57,6 +78,16 @@ try {
 </BaseLayout>
 
 <script define:vars={{ initialProps }}>
+  /* ── HTML escape ───────────────────────────────────────────── */
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /* ── State ─────────────────────────────────────────────────── */
   let allProps   = Array.isArray(initialProps) ? initialProps : [];
   let filtered   = [...allProps];
@@ -123,17 +154,17 @@ try {
 
     return `<article class="prop-card" role="listitem">
   <div class="prop-card__img">
-    <img src="${img}" alt="${p.titulo}" loading="lazy" width="400" height="200" />
-    <span class="prop-card__badge prop-card__badge--tipo">${TIPO[p.tipo] || p.tipo}</span>
-    <span class="prop-card__badge prop-card__badge--estado prop-card__badge--${VCLS[p.estado_venta] || 'disponible'}">${VENTA[p.estado_venta] || p.estado_venta}</span>
+    <img src="${esc(img)}" alt="${esc(p.titulo)}" loading="lazy" width="400" height="200" />
+    <span class="prop-card__badge prop-card__badge--tipo">${TIPO[p.tipo] || esc(p.tipo)}</span>
+    <span class="prop-card__badge prop-card__badge--estado prop-card__badge--${VCLS[p.estado_venta] ?? 'disponible'}">${VENTA[p.estado_venta] || esc(p.estado_venta)}</span>
     ${badge}
   </div>
   <div class="prop-card__body">
-    <p class="prop-card__zona">${I.pin}${p.zona}</p>
-    <h3 class="prop-card__title">${p.titulo}</h3>
-    <p class="prop-card__price">${fmt.format(p.precio)}<span>${p.moneda}</span></p>
+    <p class="prop-card__zona">${I.pin}${esc(p.zona)}</p>
+    <h3 class="prop-card__title">${esc(p.titulo)}</h3>
+    <p class="prop-card__price">${fmt.format(p.precio)}<span>${esc(p.moneda)}</span></p>
     ${feats ? `<div class="prop-card__features">${feats}</div>` : ''}
-    <a class="button button--gold prop-card__cta" href="${detailUrl}">${I.arrow} Ver propiedad</a>
+    <a class="button button--gold prop-card__cta" href="${esc(detailUrl)}">${I.arrow} Ver propiedad</a>
   </div>
 </article>`;
   }

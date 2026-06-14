@@ -42,16 +42,17 @@ const FALLBACK = '/assets/mazatlan-hero.webp';
 let images: string[] = [];
 
 if (prop.carpeta_imagenes) {
+  const folder = prop.carpeta_imagenes.replace(/\.\./g, '').replace(/^\//, '');
   const { data: storageFiles } = await supabase.storage
     .from('propiedades-imagenes')
-    .list(prop.carpeta_imagenes, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+    .list(folder, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
 
   if (storageFiles?.length) {
     images = storageFiles
       .filter(f => f.name !== '.emptyFolderPlaceholder')
       .map(f => supabase.storage
         .from('propiedades-imagenes')
-        .getPublicUrl(`${prop.carpeta_imagenes}/${f.name}`).data.publicUrl
+        .getPublicUrl(`${folder}/${f.name}`).data.publicUrl
       );
   }
 }
@@ -130,10 +131,10 @@ const charsWithIcons = (prop.caracteristicas ?? []).map((char) => ({
 
 // ── Map ───────────────────────────────────────────────────────
 const mapSrc = prop.latitud && prop.longitud
-  ? `https://maps.google.com/maps?q=${prop.latitud},${prop.longitud}&z=16&output=embed&hl=es`
+  ? `https://maps.google.com/maps?q=${prop.latitud.toFixed(3)},${prop.longitud.toFixed(3)}&z=16&output=embed&hl=es`
   : null;
 const mapsHref = prop.latitud && prop.longitud
-  ? `https://www.google.com/maps?q=${prop.latitud},${prop.longitud}`
+  ? `https://www.google.com/maps?q=${prop.latitud.toFixed(3)},${prop.longitud.toFixed(3)}`
   : '#';
 
 // ── Zone distances ────────────────────────────────────────────
@@ -155,10 +156,11 @@ const pageDesc  = prop.descripcion
   ?? `${tipoLabel} en ${prop.zona}, Mazatlán. ${preciofmt} ${prop.moneda}.`;
 
 // ── Vars for client script ────────────────────────────────────
-const galleryImages = images;
-const propTitle     = prop.titulo;
-const propZona      = prop.zona;
-const propSlug      = prop.slug;
+const sanitize = (s: string) => s.replace(/<\/script>/gi, '<\\/script>');
+const galleryImages = images.map(sanitize);
+const propTitle     = sanitize(prop.titulo);
+const propZona      = sanitize(prop.zona);
+const propSlug      = sanitize(prop.slug);
 ---
 
 <BaseLayout title={pageTitle} description={pageDesc}>
